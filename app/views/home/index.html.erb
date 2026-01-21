@@ -1,142 +1,150 @@
-<div class="max-w-[85rem] px-4 py-6 mx-auto" data-controller="calagem">
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <div class="lg:col-span-4 space-y-6">
-      <div class="bg-white border shadow-sm rounded-xl p-5 dark:bg-slate-900 dark:border-gray-700">
-        <h2 class="text-lg font-bold mb-4 dark:text-white border-b pb-2">Parâmetros da Análise de Solo</h2>
-        <div class="mb-6">
+<div class="max-w-7xl px-4 sm:px-6 lg:px-8 py-10 mx-auto" data-controller="calagem">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <div class="lg:col-span-4 space-y-8">
+      <div class="bg-white border shadow-sm rounded-2xl p-6 dark:bg-slate-900 dark:border-gray-700">
+        <h2 class="text-xl font-bold mb-6 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3">
+          Análise de Solo
+        </h2>
+        
+        <div class="mb-8">
+          <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Cultura Alvo</label>
           <select data-action="change->calagem#applyCulture" 
                   data-calagem-target="cultureSelect"
-                  class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300 focus:ring-blue-500">
-            <option value="">Selecione a cultura...</option>
+                  class="w-full bg-gray-50 border-gray-200 rounded-xl text-sm dark:bg-slate-800 dark:border-gray-700 dark:text-gray-300 focus:ring-blue-500 focus:border-blue-500 p-3">
+            <option value="">Carregando culturas...</option>
           </select>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-5">
           <% 
             params_list = [
               { id: "CTC", label: "CTC (T)" },
               { id: "PRNT", label: "PRNT (%)", default: 100 },
               { id: "P-rem", label: "P-rem (mg/L)" },
-              { id: "Al", label: "Al (cmol<sub>c</sub>)" },
-              { id: "Ca", label: "Ca (cmol<sub>c</sub>)" },
-              { id: "Mg", label: "Mg (cmol<sub>c</sub>)" },
+              { id: "Al", label: "Al (cmol<sub>c</sub>/dm<sup>3</sup>)" },
+              { id: "Ca", label: "Ca (cmol<sub>c</sub>/dm<sup>3</sup>)" },
+              { id: "Mg", label: "Mg (cmol<sub>c</sub>/dm<sup>3</sup>)" },
               { id: "Va", label: "V<sub>a</sub> (Alvo %)" }
             ] 
           %>
           <% params_list.each do |item| %>
             <div>
-              <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= item[:label].html_safe %></label>
+              <label class="block text-[11px] font-semibold text-gray-500 mb-1.5 tracking-tight">
+                <%= item[:label].html_safe %>
+              </label>
               <input type="number"
                      data-calagem-target="input"
                      data-param-name="<%= item[:id] %>"
                      data-action="input->calagem#calculate"
                      step="0.01" 
                      <%= "value=#{item[:default]}" if item[:default] %>
-                     class="w-full border-gray-200 rounded-lg text-sm dark:bg-slate-800 dark:text-gray-300 focus:ring-blue-500">
+                     class="w-full border-gray-200 rounded-lg text-sm dark:bg-slate-800 dark:border-gray-700 dark:text-gray-300 focus:ring-blue-500 transition-all p-2.5">
             </div>
           <% end %>
+
+          <input type="hidden" data-calagem-target="input" data-param-name="X" value="0">
+          <input type="hidden" data-calagem-target="input" data-param-name="mt" value="0">
         </div>
       </div>
 
-      <div class="bg-white border shadow-sm rounded-xl p-4 dark:bg-slate-900 dark:border-gray-700">
-        <div class="flex justify-between items-center mb-3">
-           <span class="text-[10px] text-gray-400 font-bold text-blue-600">Necessidade de Calagem (NC)</span>
+      <div class="bg-blue-600 rounded-2xl p-6 shadow-lg shadow-blue-200 dark:shadow-none">
+        <div class="flex justify-between items-center mb-5">
+           <span class="text-xs font-bold text-white/80 tracking-widest">Recomendação de Calagem</span>
         </div>
         <div class="grid grid-cols-2 gap-4 text-center">
-          <div class="p-2 border rounded-lg dark:border-gray-800">
-            <span class="block text-[10px] text-gray-500 ">Saturação de Bases</span>
-            <span class="text-xl font-bold text-blue-600" data-calagem-target="saturacaoResult">0.00</span>
-            <span class="block text-[9px] text-gray-400">t/ha</span>
+          <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
+            <span class="block text-[10px] text-blue-100 mb-1 font-medium ">Saturação de Bases</span>
+            <span class="text-2xl font-black text-white" data-calagem-target="saturacaoResult">0.00</span>
+            <span class="block text-[10px] text-blue-200 mt-1">t/ha</span>
           </div>
-          <div class="p-2 border rounded-lg dark:border-gray-800">
-            <span class="block text-[10px] text-gray-500 ">Neutralização do Al<sup>+3</sup></span>
-            <span class="text-xl font-bold text-blue-600" data-calagem-target="neutralizacaoResult">0.00</span>
-            <span class="block text-[9px] text-gray-400">t/ha</span>
+          <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
+            <span class="block text-[10px] text-blue-100 mb-1 font-medium ">Neutralização de Alumínio Al<sup>+3</sup></span>
+            <span class="text-2xl font-black text-white" data-calagem-target="neutralizacaoResult">0.00</span>
+            <span class="block text-[10px] text-blue-200 mt-1">t/ha</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="lg:col-span-8 space-y-6">
-      <div class="bg-white border rounded-xl dark:bg-slate-900 dark:border-gray-700 overflow-hidden min-h-full shadow-sm">
+    <div class="lg:col-span-8 space-y-8">
+      <div class="bg-white border shadow-sm rounded-2xl dark:bg-slate-900 dark:border-gray-700 overflow-hidden min-h-full">
         
-        <div class="p-4 border-b flex justify-between items-center bg-gray-50 dark:bg-white/5">
+        <div class="p-6 border-b flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
           <div>
-            <h2 class="font-bold dark:text-white">Comparativo Financeiro</h2>
-            <p class="text-[10px] text-gray-500">Dose ajustada pelo PRNT de cada produto</p>
+            <h2 class="text-lg font-bold dark:text-white">Comparativo Financeiro</h2>
           </div>
-          <div class="flex gap-2">
-            <button type="button" data-action="click->calagem#addProduct" 
-                    class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">
-              + Adicionar Produto
-            </button>
-          </div>
+          <button type="button" data-action="click->calagem#addProduct" 
+                  class="py-2.5 px-5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Novo Produto
+          </button>
         </div>
 
-        <div class="p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
-          <div class="max-w-[200px]">
-            <label class="block text-xs font-bold text-blue-600 mb-1 ">Área do Talhão (ha)</label>
-            <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
-                   placeholder="0.00"
-                   class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300">
+        <div class="px-6 py-5 border-b bg-blue-50/20 dark:bg-blue-900/10">
+          <div class="max-w-xs">
+            <label class="block text-xs font-bold text-blue-600 mb-2 ">Área do Talhão (ha)</label>
+            <div class="relative">
+              <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
+                     placeholder="0.00"
+                     class="w-full bg-white border-gray-200 rounded-xl text-sm dark:bg-slate-900 dark:border-gray-700 dark:text-gray-300 focus:ring-blue-500 p-3">
+              <div class="absolute right-3 top-3 text-gray-400 text-sm">ha</div>
+            </div>
             <input type="hidden" data-calagem-target="finalRecommendation" value="0">
           </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full">
+          <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800">
             <thead>
-              <tr class="text-[10px] text-gray-400 border-b bg-gray-50/50 dark:bg-slate-800">
-                <th class="px-4 py-3 text-left">Calcário / Marca</th>
-                <th class="px-4 py-3 text-left text-blue-600">PRNT %</th>
-                <th class="px-4 py-3 text-left">Preço/t (R$)</th>
-                <th class="px-4 py-3 text-left">Frete/t (R$)</th>
-                <th class="px-4 py-3 text-left text-orange-600">Ca:Mg</th>
-                <th class="px-4 py-3 text-right">Investimento Total</th>
-                <th class="px-4 py-3"></th>
+              <tr class="text-[11px] text-gray-400 border-b bg-gray-50/30 dark:bg-slate-800/50 tracking-wider">
+                <th class="px-6 py-4 text-left font-bold">Produto</th>
+                <th class="px-4 py-4 text-left text-blue-600 font-bold">PRNT (%)</th>
+                <th class="px-4 py-4 text-left font-bold">Preço (R$/t)</th>
+                <th class="px-4 py-4 text-left font-bold">Frete (R$/t)</th>
+                <th class="px-4 py-4 text-left text-orange-600 font-bold">Ca:Mg</th>
+                <th class="px-6 py-4 text-right font-bold">Investimento (R$)</th>
+                <th class="px-6 py-4 w-10"></th>
               </tr>
             </thead>
-            <tbody data-calagem-target="productList">
+            <tbody data-calagem-target="productList" class="divide-y divide-gray-50 dark:divide-gray-800">
               </tbody>
           </table>
-        </div>
-        <div id="empty-state" class="p-10 text-center hidden">
-          <p class="text-sm text-gray-500">Nenhum produto adicionado para comparação.</p>
         </div>
       </div>
     </div>
   </div>
 
   <template data-calagem-target="productTemplate">
-    <tr class="product-row border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-      <td class="p-3">
-        <input type="text" class="w-full border-none p-0 text-sm dark:text-white bg-transparent focus:ring-0 font-medium" placeholder="Ex: Calcário Calcítico">
+    <tr class="product-row hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+      <td class="px-6 py-4">
+        <input type="text" class="w-full border-none p-0 text-sm dark:text-white bg-transparent focus:ring-0 font-semibold placeholder:text-gray-300" placeholder="Ex: Dolomítico">
       </td>
-      <td class="p-3">
+      <td class="px-4 py-4">
         <input type="number" value="100" data-action="input->calagem#updateCalculations" 
-               class="product-prnt w-16 border-gray-200 rounded text-sm font-bold text-blue-600 dark:bg-slate-800 focus:ring-blue-500">
+               class="product-prnt w-16 border-gray-200 rounded-lg text-sm font-bold text-blue-600 dark:bg-slate-800 focus:ring-blue-500 py-1 px-2">
       </td>
-      <td class="p-3">
+      <td class="px-4 py-4">
         <input type="number" data-action="input->calagem#updateCalculations" 
-               class="product-price w-24 border-gray-200 rounded text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800">
+               class="product-price w-20 border-gray-200 rounded-lg text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800 py-1 px-2">
       </td>
-      <td class="p-3">
+      <td class="px-4 py-4">
         <input type="number" data-action="input->calagem#updateCalculations" 
-               class="product-freight w-24 border-gray-200 rounded text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800">
+               class="product-freight w-20 border-gray-200 rounded-lg text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800 py-1 px-2">
       </td>
-      <td class="p-3 text-orange-600 font-bold">
-        <div class="flex items-center gap-1">
-          <input type="number" placeholder="4" class="product-ratio w-10 border-gray-200 rounded text-sm text-center dark:bg-slate-800">
-          <span class="text-xs">:1</span>
+      <td class="px-4 py-4">
+        <div class="flex items-center gap-1 text-orange-600 font-bold">
+          <input type="number" placeholder="4" class="product-ratio w-10 border-gray-200 rounded-lg text-sm text-center dark:bg-slate-800 focus:ring-orange-400 py-1 px-1">
+          <span class="text-[10px]">:1</span>
         </div>
       </td>
-      <td class="p-3 text-right">
+      <td class="px-6 py-4 text-right">
         <div class="text-sm font-bold text-green-600 row-total">R$ 0,00</div>
         <div class="text-[10px] text-gray-400 row-tons italic">0.00 t total</div>
       </td>
-      <td class="p-3 text-center">
+      <td class="px-6 py-4 text-center">
         <button type="button" data-action="click->calagem#removeProduct" 
-                class="text-gray-300 hover:text-red-500 transition-colors text-xl">&times;</button>
+                class="text-gray-300 hover:text-red-500 transition-colors text-2xl leading-none">&times;</button>
       </td>
     </tr>
   </template>

@@ -1,117 +1,123 @@
 import { Controller } from "@hotwired/stimulus"
 
+const CULTURES_DATA = {
+  soja: { label: "Soja", va: 70, x: 2.0, mt: 15 },
+  milho: { label: "Milho", va: 60, x: 2.0, mt: 15 },
+  cafe: { label: "Café", va: 70, x: 2.5, mt: 10 },
+  pastagem: { label: "Pastagem", va: 50, x: 1.0, mt: 30 },
+  eucalipto: { label: "Eucalipto", va: 40, x: 0.5, mt: 40 }
+}
+
 export default class extends Controller {
-  static targets = [
-    "input", "area", "saturacaoResult", "neutralizacaoResult",
-    "finalRecommendation", "productList", "productTemplate"
+  static targets = [ 
+    "input", "area", "cultureSelect", "saturacaoResult", 
+    "neutralizacaoResult", "finalRecommendation", "productList", "productTemplate" 
   ]
 
-  // --- 1. SOIL ANALYSIS LOGIC ---
-  calculate() {
-    try {
-      // Create a clean object of all numeric inputs
-      const vals = {}
-      this.inputTargets.forEach(i => {
-        const name = i.dataset.paramName
-        vals[name] = parseFloat(i.value) || 0
-      })
-
-      // Explicitly define variables to avoid ReferenceErrors
-      const prntAnalise = vals["PRNT"] || 100
-      const ctc = vals["CTC"] || 0
-      const ve  = vals["Ve"] || 0
-      const va  = vals["Va"] || 0
-      
-      // Aluminum variables
-      const yFator = vals["Y"] || 0
-      const al     = vals["Al"] || 0
-      const xFator = vals["X"] || 0
-      const ca     = vals["Ca"] || 0
-      const mg     = vals["Mg"] || 0
-
-      // Formula 1: Saturação por Bases (Target - Current) * CTC / PRNT
-      // Example: ((70 - 30) * 7.3) / 100 = 2.92
-      const ncSat = prntAnalise > 0 ? Math.max(0, ((va - ve) * ctc) / prntAnalise) : 0
-
-      // Formula 2: Alumínio e Ca+Mg
-      const ncAl = prntAnalise > 0 ? Math.max(0, ((yFator * al) + (xFator - (ca + mg))) * (100 / prntAnalise)) : 0
-
-      const higherNeed = Math.max(ncSat, ncAl)
-
-      // Update UI results (Left Side)
-      this.saturacaoResultTarget.textContent = ncSat.toFixed(2)
-      this.neutralizacaoResultTarget.textContent = ncAl.toFixed(2)
-
-      // Update the hidden bridge value for the Costs calculation
-      if (this.hasFinalRecommendationTarget) {
-        this.finalRecommendationTarget.value = higherNeed
-      }
-
-      // ALWAYS trigger the cost update whenever soil values change
-      this.updateCalculations()
-      
-    } catch (error) {
-      console.error("Calculation Error:", error)
-    }
+  connect() {
+    console.log("Calagem Controller Loaded")
+    this.populateCultures()
   }
 
-  // --- 2. COSTS LOGIC ---
-  addProduct() {
-    const content = this.productTemplateTarget.content.cloneNode(true)
-    this.productListTarget.appendChild(content)
-    // After adding a row, calculate it immediately
+  // --- 1. Culture Logic ---
+  populateCultures() {
+    if (!this.hasCultureSelectTarget) return
+    
+    const select = this.cultureSelectTarget
+    select.innerHTML = '<option value="">Selecione a cultura...</option>'
+    
+    Object.keys(CULTURES_DATA).sort().forEach(key => {
+      const option = document.createElement("option")
+      option.value = key
+      option.textContent = CULTURES_DATA[key].label
+      select.appendChild(option)
+    })
+  }
+
+  applyCulture() {
+    const key = this.cultureSelectTarget.value
+    const data = CULTURES_DATA[key]
+    if (!data) return
+
+    // Helper to find input by data-param-name and set value
+    const setVal = (name, val) => {
+      const input = this.inputTargets.find(i => i.dataset.paramName === name)
+      if (input) input.value = val
+    }
+
+    setVal("Va", data.va)
+    setVal("X", data.x)
+    setVal("mt", data.mt)
+    
+    this.calculate()
+  }
+
+  // --- 2. Calculation Logic ---
+  getY(pRem) {
+    if (pRem <= 4) return 4.0;
+    if (pRem <= 10) return 3.0;
+    if (pRem <= 20) return 2.0;
+    if (pRem <= 30) return 1.0;
+    return 0.0;
+  }
+
+  calculate() {
+    const vals = {}
+    this.inputTargets.forEach(i => {
+      vals[i.dataset.paramName] = parseFloat(i.value) || 0
+    })
+
+    const Y = this.getY(vals["P-rem"])
+    const { PRNT=100, CTC=0, Va=0, Al=0, Ca=0, Mg=0, X=0 } = vals
+
+    // Calculate current saturation (Ve)
+    const ve = CTC > 0 ? ((Ca + Mg) / CTC) * 100 : 0
+
+    // NC Formulas
+    const ncSat = PRNT > 0 ? Math.max(0, ((Va - ve) * CTC) / PRNT) : 0
+    const ncAl  = PRNT > 0 ? Math.max(0, ((Y * Al) + (X - (Ca + Mg))) * (100 / PRNT)) : 0
+    
+    const higherNeed = Math.max(ncSat, ncAl)
+
+    this.saturacaoResultTarget.textContent = ncSat.toFixed(2)
+    this.neutralizacaoResultTarget.textContent = ncAl.toFixed(2)
+    this.finalRecommendationTarget.value = higherNeed
+
     this.updateCalculations()
   }
 
-  updateCalculations() {
-    try {
-      // Get the base recommendation (e.g., 2.92) and total area
-      const baseNeed = parseFloat(this.finalRecommendationTarget.value) || 0
-      const area = parseFloat(this.areaTarget.value) || 0
-
-      // Get the PRNT from the soil analysis to use as the baseline
-      const prntInput = this.inputTargets.find(i => i.dataset.paramName === 'PRNT')
-      const basePrnt = prntInput ? (parseFloat(prntInput.value) || 100) : 100
-
-      // Loop through every row in the comparison table
-      this.productListTarget.querySelectorAll('.product-row').forEach(row => {
-        const pPrnt    = parseFloat(row.querySelector('.product-prnt').value) || 100
-        const pPrice   = parseFloat(row.querySelector('.product-price').value) || 0
-        const pFreight = parseFloat(row.querySelector('.product-freight').value) || 0
-
-        // MATH: (Dose required * Baseline PRNT) / Product's actual PRNT
-        const tonsPerHa = pPrnt > 0 ? (baseNeed * basePrnt) / pPrnt : 0
-        const totalTons = tonsPerHa * area
-        const totalCost = totalTons * (pPrice + pFreight)
-
-        // Update Row UI
-        row.querySelector('.row-total').textContent = totalCost.toLocaleString('pt-BR', { 
-          style: 'currency', 
-          currency: 'BRL' 
-        })
-        row.querySelector('.row-tons').textContent = `${totalTons.toFixed(2)} t total`
-      })
-    } catch (error) {
-      console.error("Costs Update Error:", error)
-    }
+  // --- 3. Product Comparison Logic ---
+  addProduct(e) {
+    if (e) e.preventDefault()
+    const content = this.productTemplateTarget.content.cloneNode(true)
+    this.productListTarget.appendChild(content)
+    this.updateCalculations()
   }
 
-  // --- 3. UTILITIES ---
   removeProduct(e) {
+    e.preventDefault()
     e.target.closest('.product-row').remove()
     this.updateCalculations()
   }
 
-  reset() {
-    this.inputTargets.forEach(i => i.value = i.dataset.paramName === 'PRNT' ? 100 : "")
-    if (this.hasAreaTarget) this.areaTarget.value = ""
-    this.saturacaoResultTarget.textContent = "0.00"
-    this.neutralizacaoResultTarget.textContent = "0.00"
-    if (this.hasFinalRecommendationTarget) this.finalRecommendationTarget.value = 0
-    this.updateCalculations()
-  }
+  updateCalculations() {
+    const baseNeed = parseFloat(this.finalRecommendationTarget.value) || 0
+    const area = parseFloat(this.areaTarget.value) || 0
+    
+    const prntInput = this.inputTargets.find(i => i.dataset.paramName === 'PRNT')
+    const basePrnt = prntInput ? (parseFloat(prntInput.value) || 100) : 100
 
-  printReport() {
-    window.print()
+    this.productListTarget.querySelectorAll('.product-row').forEach(row => {
+      const pPrnt = parseFloat(row.querySelector('.product-prnt').value) || 100
+      const pPrice = parseFloat(row.querySelector('.product-price').value) || 0
+      const pFreight = parseFloat(row.querySelector('.product-freight').value) || 0
+
+      const tonsPerHa = pPrnt > 0 ? (baseNeed * basePrnt) / pPrnt : 0
+      const totalTons = tonsPerHa * area
+      const totalCost = totalTons * (pPrice + pFreight)
+
+      row.querySelector('.row-total').textContent = totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+      row.querySelector('.row-tons').textContent = `${totalTons.toFixed(2)} t total`
+    })
   }
 }
