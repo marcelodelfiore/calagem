@@ -1,11 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
 const CULTURES_DATA = {
-  soja: { label: "Soja", va: 70, x: 2.0, mt: 15 },
-  milho: { label: "Milho", va: 60, x: 2.0, mt: 15 },
-  cafe: { label: "Café", va: 70, x: 2.5, mt: 10 },
-  pastagem: { label: "Pastagem", va: 50, x: 1.0, mt: 30 },
-  eucalipto: { label: "Eucalipto", va: 40, x: 0.5, mt: 40 }
+  arroz_sequeiro: { label: "Arroz de Sequeiro", ve: 50, x: 2.0, mt: 25 },
+  arroz_irrigado: { label: "Arroz Irrigado", ve: 50, x: 2.0, mt: 25 },
+  cafe: { label: "Café", ve: 60, x: 3.5, mt: 25 },
+  milho_sorgo: { label: "Milho e Sorgo", va: 50, x: 2.0, mt: 15 },
+  trigo: { label: "Trigo", ve: 50, x: 2, mt: 50 },
+  feijao_soja_adubos_verdes: { label: "Feijão, soja e adubos verdes", ve: 50, x: 2, mt: 15 }
 }
 
 export default class extends Controller {
