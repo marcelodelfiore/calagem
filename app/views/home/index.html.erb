@@ -4,13 +4,6 @@
       <div class="bg-white border shadow-sm rounded-xl p-5 dark:bg-slate-900 dark:border-gray-700">
         <h2 class="text-lg font-bold mb-4 dark:text-white border-b pb-2">Parâmetros da Análise de Solo</h2>
 
-        <div class="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg dark:bg-blue-900/10 dark:border-blue-800">
-          <label class="block text-xs font-bold text-blue-600 mb-1">Área (ha)</label>
-          <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
-                 class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300">
-          <input type="hidden" data-calagem-target="finalRecommendation">
-        </div>
-
         <div class="grid grid-cols-2 gap-4">
           <% params_list = [
             { id: "CTC", label: "CTC (T)" },
@@ -20,10 +13,7 @@
             { id: "Al", label: "Al (cmol<sub>c</sub>)" },
             { id: "Ca", label: "Ca (cmol<sub>c</sub>)" },
             { id: "Mg", label: "Mg (cmol<sub>c</sub>)" },
-            { id: "P-rem", label: "P-rem (mg/L)" },
-            { id: "Y", label: "Y (Fator)" },
-            { id: "X", label: "X (cmol<sub>c</sub>)" },
-            { id: "mt", label: "m<sub>t</sub> (%)" }
+            { id: "P-rem", label: "P-rem (mg/L)" }
             ] %>
           <% params_list.each do |item| %>
             <div>
@@ -61,6 +51,13 @@
           <div class="flex gap-2">
             <button type="button" data-action="click->calagem#addProduct" class="py-1.5 px-3 bg-blue-600 text-white text-xs rounded-lg font-bold">+ Novo</button>
           </div>
+        </div>
+
+        <div class="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg dark:bg-blue-900/10 dark:border-blue-800">
+          <label class="block text-xs font-bold text-blue-600 mb-1">Área (ha)</label>
+          <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
+                 class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300">
+          <input type="hidden" data-calagem-target="finalRecommendation">
         </div>
 
         <table class="min-w-full">
