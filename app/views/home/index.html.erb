@@ -3,18 +3,26 @@
     <div class="lg:col-span-4 space-y-6">
       <div class="bg-white border shadow-sm rounded-xl p-5 dark:bg-slate-900 dark:border-gray-700">
         <h2 class="text-lg font-bold mb-4 dark:text-white border-b pb-2">Parâmetros da Análise de Solo</h2>
+        <div class="mb-6">
+          <select data-action="change->calagem#applyCulture" 
+                  data-calagem-target="cultureSelect"
+                  class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300 focus:ring-blue-500">
+            <option value="">Selecione a cultura...</option>
+          </select>
+        </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <% params_list = [
-            { id: "CTC", label: "CTC (T)" },
-            { id: "PRNT", label: "PRNT (%)", default: 100 },
-            { id: "Ve", label: "V<sub>e</sub> (%)" },
-            { id: "Va", label: "V<sub>a</sub> (%)" },
-            { id: "Al", label: "Al (cmol<sub>c</sub>)" },
-            { id: "Ca", label: "Ca (cmol<sub>c</sub>)" },
-            { id: "Mg", label: "Mg (cmol<sub>c</sub>)" },
-            { id: "P-rem", label: "P-rem (mg/L)" }
-            ] %>
+          <% 
+            params_list = [
+              { id: "CTC", label: "CTC (T)" },
+              { id: "PRNT", label: "PRNT (%)", default: 100 },
+              { id: "P-rem", label: "P-rem (mg/L)" },
+              { id: "Al", label: "Al (cmol<sub>c</sub>)" },
+              { id: "Ca", label: "Ca (cmol<sub>c</sub>)" },
+              { id: "Mg", label: "Mg (cmol<sub>c</sub>)" },
+              { id: "Va", label: "V<sub>a</sub> (Alvo %)" }
+            ] 
+          %>
           <% params_list.each do |item| %>
             <div>
               <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= item[:label].html_safe %></label>
@@ -22,73 +30,114 @@
                      data-calagem-target="input"
                      data-param-name="<%= item[:id] %>"
                      data-action="input->calagem#calculate"
-                     step="0.01" <%= "value=#{item[:default]}" if item[:default] %>
-                     class="w-full border-gray-200 rounded-lg text-sm dark:bg-slate-800 dark:text-gray-300">
+                     step="0.01" 
+                     <%= "value=#{item[:default]}" if item[:default] %>
+                     class="w-full border-gray-200 rounded-lg text-sm dark:bg-slate-800 dark:text-gray-300 focus:ring-blue-500">
             </div>
           <% end %>
         </div>
-
       </div>
 
       <div class="bg-white border shadow-sm rounded-xl p-4 dark:bg-slate-900 dark:border-gray-700">
+        <div class="flex justify-between items-center mb-3">
+           <span class="text-[10px] text-gray-400 font-bold text-blue-600">Necessidade de Calagem (NC)</span>
+        </div>
         <div class="grid grid-cols-2 gap-4 text-center">
-          <div>
+          <div class="p-2 border rounded-lg dark:border-gray-800">
             <span class="block text-[10px] text-gray-500 ">Saturação de Bases</span>
             <span class="text-xl font-bold text-blue-600" data-calagem-target="saturacaoResult">0.00</span>
+            <span class="block text-[9px] text-gray-400">t/ha</span>
           </div>
-          <div>
+          <div class="p-2 border rounded-lg dark:border-gray-800">
             <span class="block text-[10px] text-gray-500 ">Neutralização do Al<sup>+3</sup></span>
             <span class="text-xl font-bold text-blue-600" data-calagem-target="neutralizacaoResult">0.00</span>
+            <span class="block text-[9px] text-gray-400">t/ha</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="lg:col-span-8">
-      <div class="bg-white border rounded-xl dark:bg-slate-900 dark:border-gray-700 overflow-hidden min-h-full">
+    <div class="lg:col-span-8 space-y-6">
+      <div class="bg-white border rounded-xl dark:bg-slate-900 dark:border-gray-700 overflow-hidden min-h-full shadow-sm">
+        
         <div class="p-4 border-b flex justify-between items-center bg-gray-50 dark:bg-white/5">
-          <h2 class="font-bold dark:text-white">Comparativo Financeiro</h2>
+          <div>
+            <h2 class="font-bold dark:text-white">Comparativo Financeiro</h2>
+            <p class="text-[10px] text-gray-500">Dose ajustada pelo PRNT de cada produto</p>
+          </div>
           <div class="flex gap-2">
-            <button type="button" data-action="click->calagem#addProduct" class="py-1.5 px-3 bg-blue-600 text-white text-xs rounded-lg font-bold">+ Novo</button>
+            <button type="button" data-action="click->calagem#addProduct" 
+                    class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-bold transition-colors shadow-sm">
+              + Adicionar Produto
+            </button>
           </div>
         </div>
 
-        <div class="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg dark:bg-blue-900/10 dark:border-blue-800">
-          <label class="block text-xs font-bold text-blue-600 mb-1">Área (ha)</label>
-          <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
-                 class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300">
-          <input type="hidden" data-calagem-target="finalRecommendation">
+        <div class="p-4 border-b bg-blue-50/50 dark:bg-blue-900/10">
+          <div class="max-w-[200px]">
+            <label class="block text-xs font-bold text-blue-600 mb-1 ">Área do Talhão (ha)</label>
+            <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
+                   placeholder="0.00"
+                   class="w-full bg-white border-gray-200 rounded-lg text-sm dark:bg-slate-900 dark:text-gray-300">
+            <input type="hidden" data-calagem-target="finalRecommendation" value="0">
+          </div>
         </div>
 
-        <table class="min-w-full">
-          <thead>
-            <tr class="text-[10px] text-gray-400 border-b bg-gray-50/50 dark:bg-slate-800">
-              <th class="px-4 py-3 text-left">Produto</th>
-              <th class="px-4 py-3 text-left text-blue-600">PRNT %</th>
-              <th class="px-4 py-3 text-left text-slate-500 font-bold">Preço/t</th>
-              <th class="px-4 py-3 text-left text-slate-500 font-bold">Frete/t</th>
-              <th class="px-4 py-3 text-left text-orange-600">Ca:Mg</th>
-              <th class="px-4 py-3 text-right">Total</th>
-            </tr>
-          </thead>
-          <tbody data-calagem-target="productList"></tbody>
-        </table>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="text-[10px] text-gray-400 border-b bg-gray-50/50 dark:bg-slate-800">
+                <th class="px-4 py-3 text-left">Calcário / Marca</th>
+                <th class="px-4 py-3 text-left text-blue-600">PRNT %</th>
+                <th class="px-4 py-3 text-left">Preço/t (R$)</th>
+                <th class="px-4 py-3 text-left">Frete/t (R$)</th>
+                <th class="px-4 py-3 text-left text-orange-600">Ca:Mg</th>
+                <th class="px-4 py-3 text-right">Investimento Total</th>
+                <th class="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody data-calagem-target="productList">
+              </tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="p-10 text-center hidden">
+          <p class="text-sm text-gray-500">Nenhum produto adicionado para comparação.</p>
+        </div>
       </div>
     </div>
   </div>
 
   <template data-calagem-target="productTemplate">
-    <tr class="product-row border-b dark:border-gray-800">
-      <td class="p-3"><input type="text" class="w-full border-none p-0 text-sm dark:text-white bg-transparent focus:ring-0" placeholder="Nome..."></td>
-      <td class="p-3"><input type="number" value="100" data-action="input->calagem#updateCalculations" class="product-prnt w-14 border-gray-200 rounded text-sm font-bold text-blue-600 dark:bg-slate-800"></td>
-      <td class="p-3"><input type="number" data-action="input->calagem#updateCalculations" class="product-price w-20 border-gray-200 rounded text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800 font-bold"></td>
-      <td class="p-3"><input type="number" data-action="input->calagem#updateCalculations" class="product-freight w-20 border-gray-200 rounded text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800 font-bold"></td>
-      <td class="p-3 text-orange-600 font-bold"><div class="flex items-center"><input type="number" data-action="input->calagem#updateCalculations" class="product-ratio w-10 border-gray-200 rounded text-sm text-center dark:bg-slate-800"> :1</div></td>
+    <tr class="product-row border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+      <td class="p-3">
+        <input type="text" class="w-full border-none p-0 text-sm dark:text-white bg-transparent focus:ring-0 font-medium" placeholder="Ex: Calcário Calcítico">
+      </td>
+      <td class="p-3">
+        <input type="number" value="100" data-action="input->calagem#updateCalculations" 
+               class="product-prnt w-16 border-gray-200 rounded text-sm font-bold text-blue-600 dark:bg-slate-800 focus:ring-blue-500">
+      </td>
+      <td class="p-3">
+        <input type="number" data-action="input->calagem#updateCalculations" 
+               class="product-price w-24 border-gray-200 rounded text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800">
+      </td>
+      <td class="p-3">
+        <input type="number" data-action="input->calagem#updateCalculations" 
+               class="product-freight w-24 border-gray-200 rounded text-sm text-slate-700 dark:text-slate-300 dark:bg-slate-800">
+      </td>
+      <td class="p-3 text-orange-600 font-bold">
+        <div class="flex items-center gap-1">
+          <input type="number" placeholder="4" class="product-ratio w-10 border-gray-200 rounded text-sm text-center dark:bg-slate-800">
+          <span class="text-xs">:1</span>
+        </div>
+      </td>
       <td class="p-3 text-right">
         <div class="text-sm font-bold text-green-600 row-total">R$ 0,00</div>
-        <div class="text-[10px] text-gray-400 row-tons">0.00 t total</div>
+        <div class="text-[10px] text-gray-400 row-tons italic">0.00 t total</div>
       </td>
-      <td class="p-3 text-right"><button type="button" data-action="click->calagem#removeProduct" class="text-gray-300 hover:text-red-500 text-xl">×</button></td>
+      <td class="p-3 text-center">
+        <button type="button" data-action="click->calagem#removeProduct" 
+                class="text-gray-300 hover:text-red-500 transition-colors text-xl">&times;</button>
+      </td>
     </tr>
   </template>
 </div>
