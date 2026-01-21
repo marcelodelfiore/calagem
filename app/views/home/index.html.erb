@@ -20,6 +20,7 @@
             { id: "Al", label: "Al (cmol<sub>c</sub>)" },
             { id: "Ca", label: "Ca (cmol<sub>c</sub>)" },
             { id: "Mg", label: "Mg (cmol<sub>c</sub>)" },
+            { id: "P-rem", label: "P-rem (mg/L)" },
             { id: "Y", label: "Y (Fator)" },
             { id: "X", label: "X (cmol<sub>c</sub>)" },
             { id: "mt", label: "m<sub>t</sub> (%)" }
@@ -58,14 +59,13 @@
         <div class="p-4 border-b flex justify-between items-center bg-gray-50 dark:bg-white/5">
           <h2 class="font-bold dark:text-white">Comparativo Financeiro</h2>
           <div class="flex gap-2">
-            <button type="button" data-action="click->calagem#printReport" class="py-1.5 px-3 border border-gray-200 text-gray-800 text-xs rounded-lg dark:text-white hover:bg-gray-100">Relatório</button>
             <button type="button" data-action="click->calagem#addProduct" class="py-1.5 px-3 bg-blue-600 text-white text-xs rounded-lg font-bold">+ Novo</button>
           </div>
         </div>
 
         <table class="min-w-full">
           <thead>
-            <tr class="text-[10px] text-gray-400 uppercase border-b bg-gray-50/50 dark:bg-slate-800">
+            <tr class="text-[10px] text-gray-400 border-b bg-gray-50/50 dark:bg-slate-800">
               <th class="px-4 py-3 text-left">Produto</th>
               <th class="px-4 py-3 text-left text-blue-600">PRNT %</th>
               <th class="px-4 py-3 text-left text-slate-500 font-bold">Preço/t</th>
