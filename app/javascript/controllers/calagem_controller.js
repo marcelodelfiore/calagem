@@ -1,59 +1,55 @@
 import { Controller } from "@hotwired/stimulus"
 
 const CULTURES_DATA = {
-  arroz_sequeiro: { label: "Arroz de Sequeiro", ve: 50, x: 2.0, mt: 25 },
-  arroz_irrigado: { label: "Arroz Irrigado", ve: 50, x: 2.0, mt: 25 },
-  cafe: { label: "Café", ve: 60, x: 3.5, mt: 25 },
-  milho_sorgo: { label: "Milho e Sorgo", va: 50, x: 2.0, mt: 15 },
-  trigo: { label: "Trigo", ve: 50, x: 2, mt: 50 },
-  feijao_soja_adubos_verdes: { label: "Feijão, soja e adubos verdes", ve: 50, x: 2, mt: 15 }
+  soja: { label: "Soja", ve: 70, x: 2.0, mt: 15 },
+  milho: { label: "Milho", ve: 60, x: 2.0, mt: 15 },
+  cafe: { label: "Café", ve: 70, x: 2.5, mt: 10 },
+  pastagem: { label: "Pastagem", ve: 50, x: 1.0, mt: 30 },
+  eucalipto: { label: "Eucalipto", ve: 40, x: 0.5, mt: 40 }
 }
 
 export default class extends Controller {
   static targets = [ 
-    "input", "area", "cultureSelect", "saturacaoResult", 
-    "neutralizacaoResult", "finalRecommendation", "productList", "productTemplate" 
+    "area", "cultureSelect", "saturacaoResult", 
+    "neutralizacaoResult", "saturacaoValue", "neutralizacaoValue",
+    "productList", "productTemplate" 
   ]
 
   connect() {
-    console.log("Calagem Controller Loaded")
-    this.populateCultures()
+    this.populateCultures();
   }
 
-  // --- 1. Culture Logic ---
   populateCultures() {
-    if (!this.hasCultureSelectTarget) return
-    
-    const select = this.cultureSelectTarget
-    select.innerHTML = '<option value="">Selecione a cultura...</option>'
+    if (!this.hasCultureSelectTarget) return;
+    const select = this.cultureSelectTarget;
+    select.innerHTML = '<option value="">Selecione a cultura...</option>';
     
     Object.keys(CULTURES_DATA).sort().forEach(key => {
-      const option = document.createElement("option")
-      option.value = key
-      option.textContent = CULTURES_DATA[key].label
-      select.appendChild(option)
-    })
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = CULTURES_DATA[key].label;
+      select.appendChild(option);
+    });
   }
 
   applyCulture() {
-    const key = this.cultureSelectTarget.value
-    const data = CULTURES_DATA[key]
-    if (!data) return
+    const key = this.cultureSelectTarget.value;
+    const data = CULTURES_DATA[key];
+    if (!data) return;
 
-    // Helper to find input by data-param-name and set value
+    // Inputs ocultos ou visíveis via data-param-name
     const setVal = (name, val) => {
-      const input = this.inputTargets.find(i => i.dataset.paramName === name)
-      if (input) input.value = val
+      const input = this.element.querySelector(`[data-param-name="${name}"]`);
+      if (input) input.value = val;
     }
 
-    setVal("Va", data.va)
-    setVal("X", data.x)
-    setVal("mt", data.mt)
+    setVal("Ve", data.ve);
+    setVal("X", data.x);
+    setVal("mt", data.mt);
     
-    this.calculate()
+    this.calculate();
   }
 
-  // --- 2. Calculation Logic ---
   getY(pRem) {
     if (pRem <= 4) return 4.0;
     if (pRem <= 10) return 3.0;
@@ -63,62 +59,65 @@ export default class extends Controller {
   }
 
   calculate() {
-    const vals = {}
-    this.inputTargets.forEach(i => {
-      vals[i.dataset.paramName] = parseFloat(i.value) || 0
-    })
+    const vals = {};
+    this.element.querySelectorAll('[data-param-name]').forEach(i => {
+      vals[i.dataset.paramName] = parseFloat(i.value) || 0;
+    });
 
-    const Y = this.getY(vals["P-rem"])
-    const { PRNT=100, CTC=0, Va=0, Al=0, Ca=0, Mg=0, X=0 } = vals
+    const { PRNT=100, CTC=0, Ve=0, Va=0, Al=0, Ca=0, Mg=0, X=0 } = vals;
+    const Y = this.getY(vals["P-rem"]);
 
-    // Calculate current saturation (Ve)
-    const ve = CTC > 0 ? ((Ca + Mg) / CTC) * 100 : 0
-
-    // NC Formulas
-    const ncSat = PRNT > 0 ? Math.max(0, ((Va - ve) * CTC) / PRNT) : 0
-    const ncAl  = PRNT > 0 ? Math.max(0, ((Y * Al) + (X - (Ca + Mg))) * (100 / PRNT)) : 0
+    // NC = (Ve - Va) * CTC / PRNT
+    const ncSat = (PRNT > 0) ? Math.max(0, ((Ve - Va) * CTC) / PRNT) : 0;
     
-    const higherNeed = Math.max(ncSat, ncAl)
+    // NC Alumínio = [Y*Al + (X - (Ca+Mg))] * (100/PRNT)
+    const ncAl  = PRNT > 0 ? Math.max(0, ((Y * Al) + (X - (Ca + Mg))) * (100 / PRNT)) : 0;
+    
+    this.saturacaoResultTarget.textContent = ncSat.toFixed(2);
+    this.neutralizacaoResultTarget.textContent = ncAl.toFixed(2);
 
-    this.saturacaoResultTarget.textContent = ncSat.toFixed(2)
-    this.neutralizacaoResultTarget.textContent = ncAl.toFixed(2)
-    this.finalRecommendationTarget.value = higherNeed
+    this.saturacaoValueTarget.value = ncSat;
+    this.neutralizacaoValueTarget.value = ncAl;
 
-    this.updateCalculations()
+    this.updateCalculations();
   }
 
-  // --- 3. Product Comparison Logic ---
   addProduct(e) {
-    if (e) e.preventDefault()
-    const content = this.productTemplateTarget.content.cloneNode(true)
-    this.productListTarget.appendChild(content)
-    this.updateCalculations()
+    if (e) e.preventDefault();
+    const content = this.productTemplateTarget.content.cloneNode(true);
+    this.productListTarget.appendChild(content);
+    this.updateCalculations();
   }
 
   removeProduct(e) {
-    e.preventDefault()
-    e.target.closest('.product-row').remove()
-    this.updateCalculations()
+    e.preventDefault();
+    e.target.closest('.product-row').remove();
+    this.updateCalculations();
   }
 
   updateCalculations() {
-    const baseNeed = parseFloat(this.finalRecommendationTarget.value) || 0
-    const area = parseFloat(this.areaTarget.value) || 0
+    const ncSatBase = parseFloat(this.saturacaoValueTarget.value) || 0;
+    const ncAlBase = parseFloat(this.neutralizacaoValueTarget.value) || 0;
+    const area = parseFloat(this.areaTarget.value) || 0;
     
-    const prntInput = this.inputTargets.find(i => i.dataset.paramName === 'PRNT')
-    const basePrnt = prntInput ? (parseFloat(prntInput.value) || 100) : 100
+    const inputPrntBase = this.element.querySelector('[data-param-name="PRNT"]');
+    const basePrnt = inputPrntBase ? (parseFloat(inputPrntBase.value) || 100) : 100;
 
     this.productListTarget.querySelectorAll('.product-row').forEach(row => {
-      const pPrnt = parseFloat(row.querySelector('.product-prnt').value) || 100
-      const pPrice = parseFloat(row.querySelector('.product-price').value) || 0
-      const pFreight = parseFloat(row.querySelector('.product-freight').value) || 0
+      const pPrnt = parseFloat(row.querySelector('.product-prnt').value) || 100;
+      const pPrice = parseFloat(row.querySelector('.product-price').value) || 0;
+      const pFreight = parseFloat(row.querySelector('.product-freight').value) || 0;
+      const costPerTon = pPrice + pFreight;
 
-      const tonsPerHa = pPrnt > 0 ? (baseNeed * basePrnt) / pPrnt : 0
-      const totalTons = tonsPerHa * area
-      const totalCost = totalTons * (pPrice + pFreight)
+      const tonsHaSat = pPrnt > 0 ? (ncSatBase * basePrnt) / pPrnt : 0;
+      const tonsHaAl = pPrnt > 0 ? (ncAlBase * basePrnt) / pPrnt : 0;
 
-      row.querySelector('.row-total').textContent = totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-      row.querySelector('.row-tons').textContent = `${totalTons.toFixed(2)} t total`
-    })
+      const totalCostSat = tonsHaSat * area * costPerTon;
+      const totalCostAl = tonsHaAl * area * costPerTon;
+
+      const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+      row.querySelector('.row-total-sat').textContent = formatter.format(totalCostSat);
+      row.querySelector('.row-total-al').textContent = formatter.format(totalCostAl);
+    });
   }
 }
