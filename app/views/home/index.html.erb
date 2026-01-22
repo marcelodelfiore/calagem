@@ -30,13 +30,13 @@
             </div>
 
             <div>
-              <label class="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-tighter">V<sub>a</sub> (%)</label>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-tighter">V<sub>a</sub> (%)</label>
               <input type="number" data-param-name="Va" data-action="input->calagem#calculate"
                      class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
 
             <% [
-              ["CTC", "CTC"],
+              ["CTC", "CTC (T)"],
               ["PRNT", "PRNT (%)"],
               ["P-rem", "P-rem (mg/L)"],
               ["Al", "Al (cmol<sub>c</sub>/dm<sup>3</sup>)"],
@@ -51,7 +51,7 @@
                      <%= 'value=100' if id == 'PRNT' %>
                      class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
-          <% end %>
+            <% end %>
           </div>
         </div>
 
@@ -69,7 +69,7 @@
               </div>
             </div>
             <div class="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-center">
-              <span class="block text-[10px] text-orange-400 font-bold mb-1 ">Neutralização de Al<sup>+3<sup></span>
+              <span class="block text-[10px] text-orange-400 font-bold mb-1 ">Neutralização de Al<sup>+3</sup></span>
               <div class="flex items-baseline justify-center gap-1">
                 <span class="text-3xl font-black text-orange-500" data-calagem-target="neutralizacaoResult">0.00</span>
                 <span class="text-[10px] text-orange-400/60 font-bold">t/ha</span>
@@ -88,7 +88,7 @@
             </h2>
             <button data-action="click->calagem#addProduct"
                     class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-900/20">
-                    + Adicionar Produto
+                    + Adicionar Corretivo
             </button>
           </div>
 
@@ -104,13 +104,14 @@
           <div class="overflow-x-auto flex-grow">
             <table class="w-full border-collapse">
               <thead>
-                <tr class="text-[10px] text-slate-500 tracking-tighter border-b border-slate-800 text-center">
-                  <th class="p-4 text-left font-bold ">Corretivo</th>
-                  <th class="p-4 font-bold ">Relação Ca/Mg <br><span class="text-[8px] opacity-70">Projetada (V<sub>e</sub>)</span></th>
-                  <th class="p-4 font-bold ">Custos (R$/t)</th>
-                  <th class="p-4 font-bold text-blue-500 ">Saturação de Bases</th>
-                  <th class="p-4 font-bold text-orange-500 ">Neutralização de Al<sup>+3</sup></th>
-                  <th class="p-4 w-10"></th>
+                <tr class="text-[9px] text-slate-500 tracking-tighter border-b border-slate-800 text-center ">
+                  <th class="p-4 text-left font-bold w-1/4">Corretivo (com garantias de %)</th>
+                  <th class="p-2 font-bold text-blue-500 bg-blue-500/5">Relação Ca/Mg<br>(Saturação de Bases)</th>
+                  <th class="p-2 font-bold text-orange-500 bg-orange-500/5">Relação Ca/Mg<br>(Neutralização de Al<sup>+3</sup>)</th>
+                  <th class="p-2 font-bold">Custos<br>(R$/t)</th>
+                  <th class="p-2 font-bold text-blue-500">Investimento<br>(Saturação de Bases)</th>
+                  <th class="p-2 font-bold text-orange-500">Investimento<br>(Neutralização de Al<sup>+3</sup>)</th>
+                  <th class="p-2 w-8"></th>
                 </tr>
               </thead>
               <tbody data-calagem-target="productList" class="divide-y divide-slate-800 text-center">
@@ -128,35 +129,38 @@
         <input type="text" placeholder="Nome do Corretivo" class="block w-full bg-transparent border-none p-0 text-sm font-bold text-white placeholder-slate-600 outline-none mb-2">
         <div class="grid grid-cols-3 gap-2">
           <div class="flex flex-col">
-            <span class="text-[9px] text-slate-500 font-bold ">PRNT%</span>
+            <span class="text-[8px] text-slate-500 font-bold uppercase tracking-tighter">PRNT%</span>
             <input type="number" value="100" data-action="input->calagem#updateCalculations" class="product-prnt w-full bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-blue-400 outline-none">
           </div>
           <div class="flex flex-col">
-            <span class="text-[9px] text-slate-500 font-bold ">CaO%</span>
+            <span class="text-[8px] text-slate-500 font-bold uppercase tracking-tighter">CaO%</span>
             <input type="number" value="30" data-action="input->calagem#updateCalculations" class="product-cao w-full bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-emerald-400 outline-none">
           </div>
           <div class="flex flex-col">
-            <span class="text-[9px] text-slate-500 font-bold ">MgO%</span>
+            <span class="text-[8px] text-slate-500 font-bold uppercase tracking-tighter">MgO%</span>
             <input type="number" value="12" data-action="input->calagem#updateCalculations" class="product-mgo w-full bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-orange-400 outline-none">
           </div>
         </div>
       </td>
-      <td class="p-4">
-        <span class="row-projected-ratio font-black">0.00</span>
+      <td class="p-2 bg-blue-500/5">
+        <span class="row-ratio-sat font-black">0.00</span>
       </td>
-      <td class="p-4">
+      <td class="p-2 bg-orange-500/5">
+        <span class="row-ratio-al font-black">0.00</span>
+      </td>
+      <td class="p-2">
         <div class="flex flex-col gap-1 items-center">
-          <input type="number" data-action="input->calagem#updateCalculations" placeholder="Preço" class="product-price bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-white outline-none w-20">
-          <input type="number" data-action="input->calagem#updateCalculations" placeholder="Frete" class="product-freight bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-white outline-none w-20">
+          <input type="number" data-action="input->calagem#updateCalculations" placeholder="Preço" class="product-price bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-white outline-none w-16">
+          <input type="number" data-action="input->calagem#updateCalculations" placeholder="Frete" class="product-freight bg-slate-800 border-slate-700 rounded p-1 text-[10px] text-white outline-none w-16">
         </div>
       </td>
-      <td class="p-4">
-        <span class="row-total-sat font-black text-sm text-slate-200 block">R$ 0,00</span>
+      <td class="p-2">
+        <span class="row-total-sat font-black text-xs text-slate-200 block">R$ 0,00</span>
       </td>
-      <td class="p-4">
-        <span class="row-total-al font-black text-sm text-slate-200 block">R$ 0,00</span>
+      <td class="p-2">
+        <span class="row-total-al font-black text-xs text-slate-200 block">R$ 0,00</span>
       </td>
-      <td class="p-4">
+      <td class="p-2">
         <button data-action="click->calagem#removeProduct" class="text-slate-600 hover:text-red-500 transition-colors text-xl font-light">&times;</button>
       </td>
     </tr>

@@ -162,11 +162,9 @@ export default class extends Controller {
 
     const { PRNT=100, CTC=0, Ve=0, Va=0, Al=0, Ca=0, Mg=0, X=0 } = vals;
 
-    // Atualização da Relação Atual Ca/Mg (Display Only)
     const currentRatio = Mg > 0 ? (Ca / Mg) : 0;
     if (this.hasCurrentRatioDisplayTarget) {
       this.currentRatioDisplayTarget.value = currentRatio.toFixed(2);
-      // Mudança de cor indicativa: Verde se ok, Amarelo se fora do range
       this.currentRatioDisplayTarget.className = `w-full bg-slate-800/50 border-slate-700/50 rounded-xl text-sm p-3 font-black outline-none transition-colors ${
         currentRatio >= 3 && currentRatio <= 4 ? "text-emerald-500" : "text-amber-500"
       }`;
@@ -219,13 +217,23 @@ export default class extends Controller {
       const tonsHaSat = pPrnt > 0 ? (ncSatBase * basePrnt) / pPrnt : 0;
       const tonsHaAl = pPrnt > 0 ? (ncAlBase * basePrnt) / pPrnt : 0;
 
-      const addedCa = (tonsHaSat * (pCaO / 100)) * 0.357;
-      const addedMg = (tonsHaSat * (pMgO / 100)) * 0.496;
-      const newRatio = (soilMg + addedMg) > 0 ? (soilCa + addedCa) / (soilMg + addedMg) : 0;
+      const calcRatio = (tons) => {
+        const addedCa = (tons * (pCaO / 100)) * 0.357;
+        const addedMg = (tons * (pMgO / 100)) * 0.496;
+        return (soilMg + addedMg) > 0 ? (soilCa + addedCa) / (soilMg + addedMg) : 0;
+      };
 
-      const ratioEl = row.querySelector('.row-projected-ratio');
-      ratioEl.textContent = newRatio.toFixed(2);
-      ratioEl.className = `row-projected-ratio font-black text-sm ${newRatio >= 3 && newRatio <= 4 ? 'text-emerald-500' : 'text-amber-500'}`;
+      const ratioSat = calcRatio(tonsHaSat);
+      const ratioAl = calcRatio(tonsHaAl);
+
+      const updateUI = (selector, val) => {
+        const el = row.querySelector(selector);
+        el.textContent = val.toFixed(2);
+        el.className = `${selector.replace('.', '')} font-black text-sm ${val >= 3 && val <= 4 ? 'text-emerald-500' : 'text-amber-500'}`;
+      };
+
+      updateUI('.row-ratio-sat', ratioSat);
+      updateUI('.row-ratio-al', ratioAl);
 
       const totalCostSat = tonsHaSat * area * costPerTon;
       const totalCostAl = tonsHaAl * area * costPerTon;
