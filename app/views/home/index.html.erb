@@ -6,19 +6,16 @@
   <input type="hidden" data-param-name="mt" value="0">
 
   <div class="max-w-7xl mx-auto space-y-8">
-    
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      
       <div class="lg:col-span-4 space-y-6">
         <div class="bg-slate-900 border border-slate-800 shadow-2xl rounded-3xl p-6">
           <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
             <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
             Análise de Solo
           </h2>
-          
           <div class="mb-6">
-            <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Cultura Alvo</label>
-            <select data-action="change->calagem#applyCulture" 
+            <label class="block text-xs font-bold text-slate-400 mb-2 tracking-widest">Cultura Alvo</label>
+            <select data-action="change->calagem#applyCulture"
                     data-calagem-target="cultureSelect"
                     class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm text-white focus:ring-blue-500 focus:border-blue-500 p-3 outline-none">
             </select>
@@ -26,33 +23,49 @@
 
           <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
-              <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase">V<sub>a</sub> (Saturação Atual %)</label>
-              <input type="number" data-param-name="Va" data-action="input->calagem#calculate" 
-                     class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+              <label class="block text-[11px] font-bold text-slate-400 mb-1.5 ">V<sub>a</sub>(%)</label>
+              <input type="number" data-param-name="Va" data-action="input->calagem#calculate"
+                                                        class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
 
-            <% [["CTC", "CTC (T)"], ["PRNT", "PRNT (%)"], ["P-rem", "P-rem"], ["Al", "Alumínio"], ["Ca", "Cálcio"], ["Mg", "Magnésio"]].each do |id, label| %>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase"><%= label %></label>
-                <input type="number" data-param-name="<%= id %>" data-action="input->calagem#calculate" 
-                       <%= 'value=100' if id == 'PRNT' %>
-                       class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none">
-              </div>
-            <% end %>
+            <% [
+              ["CTC", "CTC (T)"],
+              ["PRNT", "PRNT (%)"],
+              ["P-rem", "P-rem (mg/L)"],
+              ["Al", "Al (cmol<sub>c</sub>/dm<sup>3</sup>)"],
+              ["Ca", "Ca (cmol<sub>c</sub>/dm<sup>3</sup>)"],
+              ["Mg", "Mg (cmol<sub>c</sub>/dm<sup>3</sup>)"]
+            ].each do |id, label| %>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1.5">
+                <%= label.html_safe %>
+              </label>
+              <input type="number"
+                     data-param-name="<%= id %>"
+                     data-action="input->calagem#calculate"
+                     step="0.01"
+                     <%= 'value=100' if id == 'PRNT' %>
+                     class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+          <% end %>
           </div>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+          <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+            Cálculo de Calagem
+          </h2>
           <div class="grid grid-cols-2 gap-4">
             <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-center">
-              <span class="block text-[10px] text-blue-400 font-bold uppercase mb-1">Dose V<sub>e</sub></span>
+              <span class="block text-[10px] text-blue-400 font-bold mb-1">Saturação de Bases</span>
               <div class="flex items-baseline justify-center gap-1">
                 <span class="text-3xl font-black text-blue-500" data-calagem-target="saturacaoResult">0.00</span>
                 <span class="text-xs text-blue-400/60 font-bold">t/ha</span>
               </div>
             </div>
             <div class="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-center">
-              <span class="block text-[10px] text-orange-400 font-bold uppercase mb-1">Dose Al</span>
+              <span class="block text-[10px] text-orange-400 font-bold mb-1">Neutralização de Al<sup>+3<sup></span>
               <div class="flex items-baseline justify-center gap-1">
                 <span class="text-3xl font-black text-orange-500" data-calagem-target="neutralizacaoResult">0.00</span>
                 <span class="text-xs text-orange-400/60 font-bold">t/ha</span>
@@ -69,9 +82,9 @@
               <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
               Comparativo de Investimento
             </h2>
-            <button data-action="click->calagem#addProduct" 
+            <button data-action="click->calagem#addProduct"
                     class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95">
-              + Adicionar Produto
+                    + Adicionar Produto
             </button>
           </div>
 
@@ -79,9 +92,9 @@
             <div class="flex items-center gap-4">
               <div class="max-w-[150px]">
                 <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Área Total (ha)</label>
-                <input type="number" data-calagem-target="area" data-action="input->calagem#calculate" 
-                       placeholder="0.00" 
-                       class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-2.5 text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                <input type="number" data-calagem-target="area" data-action="input->calagem#calculate"
+                                                                placeholder="0.00"
+                                                                class="w-full bg-slate-800 border-slate-700 rounded-xl text-sm p-2.5 text-white outline-none focus:ring-2 focus:ring-emerald-500">
               </div>
             </div>
           </div>
@@ -89,16 +102,16 @@
           <div class="overflow-x-auto flex-grow">
             <table class="w-full border-collapse">
               <thead>
-                <tr class="text-[10px] text-slate-500 uppercase tracking-tighter border-b border-slate-800">
-                  <th class="p-4 text-left font-bold">Produto / Eficiência</th>
-                  <th class="p-4 text-left font-bold">Preço + Frete (t)</th>
-                  <th class="p-4 font-bold text-blue-500">Total Método V<sub>e</sub></th>
-                  <th class="p-4 font-bold text-orange-500">Total Método Al</th>
+                <tr class="text-[10px] text-slate-500 tracking-tighter border-b border-slate-800">
+                  <th class="p-4 text-left font-bold">Produto</th>
+                  <th class="p-4 text-left font-bold">Custos (R$/t)</th>
+                  <th class="p-4 font-bold text-blue-500">Saturação de Bases</th>
+                  <th class="p-4 font-bold text-orange-500">Neutralização de Al<sup>+3</sup></th>
                   <th class="p-4 w-10"></th>
                 </tr>
               </thead>
               <tbody data-calagem-target="productList" class="divide-y divide-slate-800">
-                </tbody>
+              </tbody>
             </table>
           </div>
         </div>
@@ -114,8 +127,8 @@
         <div class="flex items-center gap-1 text-[10px] font-bold">
           <span class="text-slate-500 uppercase tracking-tighter">PRNT:</span>
           <input type="number" value="100" data-action="input->calagem#updateCalculations" 
-                 class="product-prnt w-12 bg-slate-800/50 border-none rounded p-0.5 text-blue-400 text-center focus:ring-1 focus:ring-blue-500 outline-none">
-          <span class="text-blue-400/50">%</span>
+                                           class="product-prnt w-12 bg-slate-800/50 border-none rounded p-0.5 text-blue-400 text-center focus:ring-1 focus:ring-blue-500 outline-none">
+                                           <span class="text-blue-400/50">%</span>
         </div>
       </td>
       <td class="p-4">
