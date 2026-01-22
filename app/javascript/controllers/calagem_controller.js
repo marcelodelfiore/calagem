@@ -1,7 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
 const CULTURES_DATA = {
-  // Cereais
   arroz_sequeiro: { label: "Arroz sequeiro", mt: 25, x: 2.0, ve: 50, obs: "Não utilizar mais de 4 t/ha de calcário por aplicação" },
   arroz_irrigado: { label: "Arroz irrigado", mt: 25, x: 2.0, ve: 50, obs: "Não utilizar mais de 4 t/ha de calcário por aplicação" },
   milho: { label: "Milho", mt: 15, x: 2.0, ve: 50, obs: "Não utilizar mais de 6 t/ha de calcário por aplicação" },
@@ -101,24 +100,18 @@ const CULTURES_DATA = {
   crisantemo: { label: "Crisântemo", mt: 5, x: 3.0, ve: 70, obs: "" },
   gramados: { label: "Gramados", mt: 5, x: 3.0, ve: 70, obs: "" },
   plantio_de_eucalipto: { label: "Plantios de Eucalipto", mt: 45, x: 1.0, ve: 30, obs: "" },
-  pastagem_leguminosas_grupo1: { label: "Pastagens (Leguminosas): Leucena; Soja-perene; Alfafa; Siratro", mt: 15, x: 2.5, ve: 60, obs:
-      "Para o estabelecimento de pastagens, prever o cálculo da calagem para incorporação na camada de 0 a 20 cm. Para pastagens já formadas, o cálculo de QC¹ deverá ser feito, prevendo-se a incorporação natural na camada de 0 a 5 cm. (¹QC = Quantidade de calcário a ser realmente utilizada.)",
-  },
-  pastagem_leguminosas_grupo2: { label: "Pastagens (Leguminosas): Kudzu; Calopogônio; Centrocema; Estilosantes; Guandu; Amendoim forrageiro; Galáxia",
-    mt: 25, x: 1.0, ve: 40, obs: "Para o estabelecimento de pastagens, prever o cálculo da calagem para incorporação na camada de 0 a 20 cm. Para pastagens já formadas, o cálculo de QC¹ deverá ser feito, prevendo-se a incorporação natural na camada de 0 a 5 cm. (¹QC = Quantidade de calcário a ser realmente utilizada.)" },
-  pastagem_gramineas_grupo1: { label: "Pastagens (Gramíneas): Grupo do Capim Elefante (Cameron, Napier, Pennisetum híbrido); Coast-cross; Tiftons; Colonião; Vencedor; Centenário; Tobiatã; Quicuio; Pangola; Transvala",
-    mt: 20, x: 2.0, ve: 50, obs: "Para o estabelecimento de pastagens, prever o cálculo da calagem para incorporação na camada de 0 a 20 cm. Para pastagens já formadas, o cálculo de QC¹ deverá ser feito, prevendo-se a incorporação natural na camada de 0 a 5 cm. (¹QC = Quantidade de calcário a ser realmente utilizada.)" },
-  pastagem_gramineas_grupo2: { label: "Pastagens (Gramíneas): Green-pânico; Tanzânia; Mombaça; Braquiária/Marandu; Estrelas; Jaraguá", mt: 25, x: 1.5, ve: 45,
-    obs: "Para o estabelecimento de pastagens, prever o cálculo da calagem para incorporação na camada de 0 a 20 cm. Para pastagens já formadas, o cálculo de QC¹ deverá ser feito, prevendo-se a incorporação natural na camada de 0 a 5 cm. (¹QC = Quantidade de calcário a ser realmente utilizada.)",
-  },
-  pastagem_gramineas_grupo3: { label: "Pastagens (Gramíneas): Braquiária IPEAN; Braquiária australiana; Quicuio da Amazônia; Andropogon; Gordura; Grama batatais", mt: 30, x: 1.0, ve: 40, obs: "Para o estabelecimento de pastagens, prever o cálculo da calagem para incorporação na camada de 0 a 20 cm. Para pastagens já formadas, o cálculo de QC¹ deverá ser feito, prevendo-se a incorporação natural na camada de 0 a 5 cm. (¹QC = Quantidade de calcário a ser realmente utilizada.)" }
+  pastagem_leguminosas_grupo1: { label: "Pastagens (Leguminosas): Leucena; Soja-perene; Alfafa; Siratro", mt: 15, x: 2.5, ve: 60, obs: "Estabelecimento: 0-20cm. Formada: 0-5cm." },
+  pastagem_leguminosas_grupo2: { label: "Pastagens (Leguminosas): Kudzu; Calopogônio; Centrocema; Estilosantes; Guandu; Amendoim forrageiro; Galáxia", mt: 25, x: 1.0, ve: 40, obs: "Estabelecimento: 0-20cm. Formada: 0-5cm." },
+  pastagem_gramineas_grupo1: { label: "Pastagens (Gramíneas): Grupo do Capim Elefante; Coast-cross; Tiftons; Colonião; Vencedor; Centenário; Tobiatã; Quicuio; Pangola; Transvala", mt: 20, x: 2.0, ve: 50, obs: "Estabelecimento: 0-20cm. Formada: 0-5cm." },
+  pastagem_gramineas_grupo2: { label: "Pastagens (Gramíneas): Green-pânico; Tanzânia; Mombaça; Braquiária/Marandu; Estrelas; Jaraguá", mt: 25, x: 1.5, ve: 45, obs: "Estabelecimento: 0-20cm. Formada: 0-5cm." },
+  pastagem_gramineas_grupo3: { label: "Pastagens (Gramíneas): Braquiária IPEAN; Braquiária australiana; Quicuio da Amazônia; Andropogon; Gordura; Grama batatais", mt: 30, x: 1.0, ve: 40, obs: "Estabelecimento: 0-20cm. Formada: 0-5cm." }
 };
 
 export default class extends Controller {
   static targets = [
     "area", "cultureSelect", "saturacaoResult",
     "neutralizacaoResult", "saturacaoValue", "neutralizacaoValue",
-    "productList", "productTemplate"
+    "productList", "productTemplate", "currentRatioDisplay"
   ]
 
   connect() {
@@ -142,7 +135,6 @@ export default class extends Controller {
     const data = CULTURES_DATA[key];
     if (!data) return;
 
-    // Inputs ocultos ou visíveis via data-param-name
     const setVal = (name, val) => {
       const input = this.element.querySelector(`[data-param-name="${name}"]`);
       if (input) input.value = val;
@@ -151,7 +143,6 @@ export default class extends Controller {
     setVal("Ve", data.ve);
     setVal("X", data.x);
     setVal("mt", data.mt);
-
     this.calculate();
   }
 
@@ -170,15 +161,23 @@ export default class extends Controller {
     });
 
     const { PRNT=100, CTC=0, Ve=0, Va=0, Al=0, Ca=0, Mg=0, X=0 } = vals;
+
+    // Atualização da Relação Atual Ca/Mg (Display Only)
+    const currentRatio = Mg > 0 ? (Ca / Mg) : 0;
+    if (this.hasCurrentRatioDisplayTarget) {
+      this.currentRatioDisplayTarget.value = currentRatio.toFixed(2);
+      // Mudança de cor indicativa: Verde se ok, Amarelo se fora do range
+      this.currentRatioDisplayTarget.className = `w-full bg-slate-800/50 border-slate-700/50 rounded-xl text-sm p-3 font-black outline-none transition-colors ${
+        currentRatio >= 3 && currentRatio <= 4 ? "text-emerald-500" : "text-amber-500"
+      }`;
+    }
+
     const Y = this.getY(vals["P-rem"]);
-
     const ncSat = (PRNT > 0) ? Math.max(0, ((Ve - Va) * CTC) / PRNT) : 0;
-
     const ncAl  = PRNT > 0 ? Math.max(0, ((Y * Al) + (X - (Ca + Mg))) * (100 / PRNT)) : 0;
 
     this.saturacaoResultTarget.textContent = ncSat.toFixed(2);
     this.neutralizacaoResultTarget.textContent = ncAl.toFixed(2);
-
     this.saturacaoValueTarget.value = ncSat;
     this.neutralizacaoValueTarget.value = ncAl;
 
@@ -202,17 +201,31 @@ export default class extends Controller {
     const ncSatBase = parseFloat(this.saturacaoValueTarget.value) || 0;
     const ncAlBase = parseFloat(this.neutralizacaoValueTarget.value) || 0;
     const area = parseFloat(this.areaTarget.value) || 0;
-    const inputPrntBase = this.element.querySelector('[data-param-name="PRNT"]');
-    const basePrnt = inputPrntBase ? (parseFloat(inputPrntBase.value) || 100) : 100;
+    
+    const soilCa = parseFloat(this.element.querySelector('[data-param-name="Ca"]').value) || 0;
+    const soilMg = parseFloat(this.element.querySelector('[data-param-name="Mg"]').value) || 0;
 
     this.productListTarget.querySelectorAll('.product-row').forEach(row => {
       const pPrnt = parseFloat(row.querySelector('.product-prnt').value) || 100;
       const pPrice = parseFloat(row.querySelector('.product-price').value) || 0;
       const pFreight = parseFloat(row.querySelector('.product-freight').value) || 0;
-      const costPerTon = pPrice + pFreight;
+      const pCaO = parseFloat(row.querySelector('.product-cao').value) || 0;
+      const pMgO = parseFloat(row.querySelector('.product-mgo').value) || 0;
 
+      const costPerTon = pPrice + pFreight;
+      const inputPrntBase = this.element.querySelector('[data-param-name="PRNT"]');
+      const basePrnt = inputPrntBase ? (parseFloat(inputPrntBase.value) || 100) : 100;
+      
       const tonsHaSat = pPrnt > 0 ? (ncSatBase * basePrnt) / pPrnt : 0;
       const tonsHaAl = pPrnt > 0 ? (ncAlBase * basePrnt) / pPrnt : 0;
+
+      const addedCa = (tonsHaSat * (pCaO / 100)) * 0.357;
+      const addedMg = (tonsHaSat * (pMgO / 100)) * 0.496;
+      const newRatio = (soilMg + addedMg) > 0 ? (soilCa + addedCa) / (soilMg + addedMg) : 0;
+
+      const ratioEl = row.querySelector('.row-projected-ratio');
+      ratioEl.textContent = newRatio.toFixed(2);
+      ratioEl.className = `row-projected-ratio font-black text-sm ${newRatio >= 3 && newRatio <= 4 ? 'text-emerald-500' : 'text-amber-500'}`;
 
       const totalCostSat = tonsHaSat * area * costPerTon;
       const totalCostAl = tonsHaAl * area * costPerTon;
